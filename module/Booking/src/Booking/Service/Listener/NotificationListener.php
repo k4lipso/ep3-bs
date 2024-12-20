@@ -113,6 +113,21 @@ class NotificationListener extends AbstractListenerAggregate
 
 	        $this->backendMailService->send($backendSubject, $message, array(), $addendum);
         }
+
+	    if ($this->optionManager->get('service.calendar.tresor-pin')) {
+        $today = new \DateTime("today");
+        $reservationDate = new \DateTime($reservation->need('date'));
+
+        $diff = $today->diff($reservationDate);
+        $diffDays = (integer)$diff->format("%R%a");
+
+        if ($diffDays == 0) {
+          $subject = "Seminarraum Pin";
+          $pin = $this->optionManager->get('service.calendar.tresor-pin');
+          $message = sprintf("die heutige Pin lautet %s. Vielen Dank für Ihre Buchung.", $pin);
+          $this->userMailService->send($user, $subject, $message);
+        }
+      }
     }
 
     public function onCancelSingle(Event $event)
